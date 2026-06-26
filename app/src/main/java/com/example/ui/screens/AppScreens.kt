@@ -951,6 +951,30 @@ fun OutputDisplaySection(
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Button(
+                        onClick = { copyToClipboard(context, item.outputText) },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (item.type == "LOVE") LoveRose else RoastFlame,
+                            contentColor = Color.White
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.ContentCopy,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Copy All Options",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
             }
         }
