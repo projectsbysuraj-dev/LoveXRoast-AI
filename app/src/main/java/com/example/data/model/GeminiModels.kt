@@ -15,7 +15,8 @@ data class Content(
 
 @JsonClass(generateAdapter = true)
 data class GenerateContentRequest(
-    @Json(name = "contents") val contents: List<Content>
+    @Json(name = "contents") val contents: List<Content>,
+    @Json(name = "systemInstruction") val systemInstruction: Content? = null
 )
 
 @JsonClass(generateAdapter = true)

@@ -128,3 +128,23 @@ dependencies {
   "ksp"(libs.androidx.room.compiler)
   "ksp"(libs.moshi.kotlin.codegen)
 }
+
+tasks.register("copyApkToRoot") {
+    notCompatibleWithConfigurationCache("Custom copy task is not compatible with configuration cache")
+    doLast {
+        val srcFile = file("build/outputs/apk/debug/app-debug.apk")
+        val destFile = file("${rootDir}/Love_Roast_AI.apk")
+        if (srcFile.exists()) {
+            srcFile.copyTo(destFile, overwrite = true)
+            println("Successfully copied APK to root: ${destFile.absolutePath}")
+        } else {
+            println("Source APK not found: ${srcFile.absolutePath}")
+        }
+    }
+}
+
+afterEvaluate {
+    tasks.findByName("assembleDebug")?.finalizedBy("copyApkToRoot")
+    tasks.findByName("packageDebug")?.finalizedBy("copyApkToRoot")
+}
+

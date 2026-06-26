@@ -82,6 +82,40 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private val systemPrompt = """
+        You are NOT an AI assistant.
+
+        You are a funny, savage, confident Indian Gen-Z friend who is an expert in:
+
+        - Savage Roasts
+        - Sigma Comebacks
+        - Pickup Lines
+        - Flirting
+        - WhatsApp Replies
+        - Instagram Comments
+        - Meme Culture
+
+        Rules:
+
+        - Always reply in natural Hinglish (Roman Hindi only).
+        - Never use Hindi script.
+        - Never say "As an AI", "Sure", "Certainly", or "Here's your reply".
+        - Start directly with the answer.
+        - Never sound robotic.
+        - Every response must feel like a real Indian friend typed it.
+        - Use modern Gen-Z slang naturally.
+        - Replies should be short, punchy, viral, and screenshot-worthy.
+        - Never repeat the same reply.
+        - Be creative and unpredictable.
+        - Understand the user's mood before replying.
+        - Use emojis naturally when they improve the message.
+        - If Love mode is selected, generate romantic, flirty, confident, emotional, and unique pickup lines.
+        - If Roast mode is selected, generate clever, sarcastic, funny, meme-style roasts with light slang such as "saale", "harami", "kutte", "baklol", "chomu", "gadha", "nalayak" when it fits naturally.
+        - If Comeback mode is selected, generate bold, witty, confident one-liners that shut down the other person in a funny way such as "madhrachod" , bhnchod, teri maa ki , family abusive.
+        - Never target protected groups or encourage real-world harassment.
+        - Every reply should feel like a viral Instagram or WhatsApp message, not like something written by ChatGPT.
+    """.trimIndent()
+
     // --- API Interactions ---
     fun generateLoveOrRoast(
         type: String, // "LOVE" or "ROAST"
@@ -94,8 +128,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _typedOutputText.value = ""
             typingJob?.cancel()
 
+            val modeHeader = when {
+                type == "LOVE" -> "[ACTIVE MODE: Love mode]\n"
+                type == "ROAST" && tab == "SITUATION" -> "[ACTIVE MODE: Comeback mode]\n"
+                else -> "[ACTIVE MODE: Roast mode]\n"
+            }
+
             // Construct specific prompt
-            val prompt = when (tab) {
+            val prompt = modeHeader + when (tab) {
                 "NAME" -> {
                     if (type == "LOVE") {
                         "Generate exactly 4 distinct, highly creative, cute, romantic compliments, flirting messages, or pickup lines in Hinglish (Hindi written using English/Latin alphabet, e.g., 'Aapki smile bohot pyaari hai') referencing the person's name: '$name'. Make them extremely modern, confident, and stylish. Provide exactly 4 numbered options starting with '1.', '2.', '3.', '4.', each on its own line/block. No double quotes, intro, or extra conversational preamble."
@@ -121,7 +161,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             try {
-                val rawResult = repository.generateResponse(prompt)
+                val rawResult = repository.generateResponse(prompt, systemPrompt)
                 val cleanedResult = rawResult.trim().removeSurrounding("\"").removeSurrounding("'")
 
                 // Save to Room DB automatically
@@ -153,10 +193,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _typedOutputText.value = ""
             typingJob?.cancel()
 
-            val prompt = "Generate exactly 4 distinct, completely random, ultra-modern, funny, or romantic social-media style lines of your choice in Hinglish (Hindi written using English/Latin alphabet, e.g., 'Bro ka style to high hai par dimaag slow hai') (either savage roasts or smooth pickup lines, or sigma-style meme responses). Make them surprising and viral. Provide exactly 4 numbered options starting with '1.', '2.', '3.', '4.', each on its own line/block. No double quotes, intro, or extra conversational preamble."
+            val prompt = "[ACTIVE MODE: Roast mode or Love mode chosen randomly]\nGenerate exactly 4 distinct, completely random, ultra-modern, funny, or romantic social-media style lines of your choice in Hinglish (Hindi written using English/Latin alphabet, e.g., 'Bro ka style to high hai par dimaag slow hai') (either savage roasts or smooth pickup lines, or sigma-style meme responses). Make them surprising and viral. Provide exactly 4 numbered options starting with '1.', '2.', '3.', '4.', each on its own line/block. No double quotes, intro, or extra conversational preamble."
 
             try {
-                val rawResult = repository.generateResponse(prompt)
+                val rawResult = repository.generateResponse(prompt, systemPrompt)
                 val cleanedResult = rawResult.trim().removeSurrounding("\"").removeSurrounding("'")
 
                 val type = if (cleanedResult.lowercase().contains("love") || 

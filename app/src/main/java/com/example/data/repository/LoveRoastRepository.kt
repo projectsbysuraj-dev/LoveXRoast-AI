@@ -37,7 +37,7 @@ class LoveRoastRepository(private val loveRoastDao: LoveRoastDao) {
     }
 
     // --- Remote API with Robust Multi-Model Fallback ---
-    suspend fun generateResponse(prompt: String): String {
+    suspend fun generateResponse(prompt: String, systemInstructionText: String? = null): String {
         val apiKey = BuildConfig.GEMINI_API_KEY
 
         // Check for missing or placeholder keys
@@ -67,7 +67,10 @@ class LoveRoastRepository(private val loveRoastDao: LoveRoastDao) {
                                 Part(text = prompt)
                             )
                         )
-                    )
+                    ),
+                    systemInstruction = systemInstructionText?.let {
+                        Content(parts = listOf(Part(text = it)))
+                    }
                 )
 
                 val response = RetrofitClient.apiService.generateContent(
